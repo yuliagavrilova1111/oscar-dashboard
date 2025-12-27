@@ -1,6 +1,20 @@
 Oscar Awards Dashboard
 **Интерактивная панель управления для анализа данных о премии Оскар с 1928 по 2025 год.**
 
+## Скриншоты
+
+### 1. Главный интерфейс с фильтрами
+![Главный экран Oscar Dashboard](https://github.com/user-attachments/assets/d741afdc-1122-46b7-8cef-1eb62ecce27a)
+
+### 2. Анализ трендов
+![Динамика по годам](https://github.com/user-attachments/assets/2781551f-770e-4805-922e-9cbe5425fd39)
+
+### 3. Сравнение категорий
+![Тепловая карта номинаций категорий Оскара](https://github.com/user-attachments/assets/9c15bf7b-40e0-4f4b-ab11-4292b48a3612)
+
+### 4. Машинное обучение
+![ML модель Random Forest для прогноза побед](https://github.com/user-attachments/assets/09d45a22-b412-4be2-9576-7aca61c53a18)
+
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://oscar-dashboard-dwncctcmvmxskgobhncedp.streamlit.app)
 
 [**Живое приложение доступно здесь**](https://oscar-dashboard-dwncctcmvmxskgobhncedp.streamlit.app)
