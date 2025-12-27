@@ -1,12 +1,18 @@
 Oscar Awards Dashboard
 **Интерактивная панель управления для анализа данных о премии Оскар с 1928 по 2025 год.**
 
-### Локальный запуск:
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://oscar-dashboard-dwncctcmvmxskgobhncedp.streamlit.app)
+
+[**Живое приложение доступно здесь**](https://oscar-dashboard-dwncctcmvmxskgobhncedp.streamlit.app)
+
+### Локальный запуск
+Если хотите запустить локально:
 ```bash
+git clone https://github.com/yuliagavrilova1111/oscar-dashboard.git
+cd oscar-dashboard
+pip install -r requirements.txt
 streamlit run app.py
 ```
-
----
 
 ## Возможности
 ### **Аналитика и визуализация**
