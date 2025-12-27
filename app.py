@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+from utils.filters import create_sidebar_filters
 
 st.set_page_config(
     page_title='Oscar Awards Dashboard',
@@ -22,75 +23,31 @@ def load_data():
     return df
 df = load_data()
 
-st.sidebar.title('Фильтры')
-min_year = df['year_ceremony'].min()
-max_year = df['year_ceremony'].max()
-year_range = st.sidebar.slider(
-    label='Годы',
-    min_value=min_year,
-    max_value=max_year,
-    value=(min_year, max_year),
-    help='Выберите диапазон лет для анализа'
-)
-
-category_options = ['Все категории'] + sorted(df['category'].unique().tolist())
-categories = st.sidebar.selectbox(
-    label='Категории',
-    options=category_options,
-    help='Выберите категорию'
-)
-
-films = st.sidebar.text_input(
-    label='Фильмы',
-    placeholder='Название',
-    help='Введите название фильма'
-)
-
-actors = st.sidebar.text_input(
-    label='Актеры',
-    placeholder='Имя',
-    help='Введите имя актера/актрисы'
-)
-
-directors = st.sidebar.text_input(
-    label='Режиссёры',
-    placeholder='Имя',
-    help='Введите имя режиссёра'
-)
-
-studios = st.sidebar.selectbox(
-    label='Студии',
-    options=['Все студии'] + sorted(df[df['is_studio']]['name'].unique().tolist()),
-    help='Выберите название студии'
-)
-
-if st.sidebar.button('Сбросить фильтры'):
-    st.rerun()
+filters = create_sidebar_filters(df)
 
 st.title("Анализ премии Оскар")
 
 df_filtered = df.copy()
-if year_range:
-    df_filtered = df_filtered[(df_filtered['year_ceremony']>=year_range[0]) & (df_filtered['year_ceremony']<=year_range[1])]
-if categories and categories != 'Все категории':
-    df_filtered = df_filtered[df_filtered['category']==categories]
-if films and films.strip():
-    df_filtered = df_filtered[df_filtered['film'].str.contains(films, case=False, na=False)]
-if actors and actors.strip():
-    df_filtered = df_filtered[(df_filtered['actor_actress']==True) & (df_filtered['name'].str.contains(actors, case=False, na=False))]
-if directors and directors.strip():
-    df_filtered = df_filtered[(df_filtered['is_director']==True) & (df_filtered['name'].str.contains(directors, case=False, na=False))]
-if studios and studios != 'Все студии':
-    df_filtered = df_filtered[df_filtered['name']==studios]
+if filters['year_range']:
+    df_filtered = df_filtered[(df_filtered['year_ceremony']>=filters['year_range'][0]) & (df_filtered['year_ceremony']<=filters['year_range'][1])]
+if filters['categories'] and filters['categories'] != 'Все категории':
+    df_filtered = df_filtered[df_filtered['category']==filters['categories']]
+if filters['films'] and filters['films'].strip():
+    df_filtered = df_filtered[df_filtered['film'].str.contains(filters['films'], case=False, na=False)]
+if filters['actors'] and filters['actors'].strip():
+    df_filtered = df_filtered[(df_filtered['actor_actress']==True) & (df_filtered['name'].str.contains(filters['actors'], case=False, na=False))]
+if filters['directors'] and filters['directors'].strip():
+    df_filtered = df_filtered[(df_filtered['is_director']==True) & (df_filtered['name'].str.contains(filters['directors'], case=False, na=False))]
+if filters['studios'] and filters['studios'] != 'Все студии':
+    df_filtered = df_filtered[df_filtered['name']==filters['studios']]
 
-if st.button('Экспортировать отфильтрованные данные'):
-    csv = df_filtered.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label='Скачать CSV',
-        data=csv,
-        file_name='oscar_filtered.csv',
-        mime='text/csv'
-    )
+csv = df_filtered.to_csv(index=False).encode('utf-8')
+st.download_button(
+    label='Экспортировать отфильтрованные данные',
+    data=csv,
+    file_name='oscar_filtered.csv',
+    mime='text/csv'
+)
 
 if len(df_filtered) == 0:
     st.error('По выбранным фильтрам данных не найдено. Пожалуйста, измените критерии поиска.')
@@ -233,27 +190,27 @@ with tab1:
 
 with tab2:
     st.markdown('### Сравнение категорий')
-    if categories != 'Все категории':
-        st.markdown(f'#### Анализ категории **{categories}**')
-        category_data = df_filtered[df_filtered['category']==categories]
+    if filters["categories"] != 'Все категории':
+        st.markdown(f'#### Анализ категории **{filters["categories"]}**')
+        category_data = df_filtered[df_filtered['category']==filters["categories"]]
         col4, col5 = st.columns(2)
         with col4:
             cat_noms = category_data.groupby('year_ceremony').size().reset_index(name='noms')
             fig4 = px.line(cat_noms, x='year_ceremony', y='noms', labels={'year_ceremony': 'Год', 'noms': 'Количество номинаций'},
-                       title=f'Количество номинаций по годам в категории "{categories}"')
+                       title=f'Количество номинаций по годам в категории "{filters["categories"]}"')
             st.plotly_chart(fig4, use_container_width=True)
         with col5:
             cat_wins = category_data.groupby('year_ceremony')['winner'].sum().reset_index(name='wins')
             fig5 = px.line(cat_wins, x='year_ceremony', y='wins', labels={'year_ceremony': 'Год', 'wins': 'Количество побед'},
-                       title=f'Количество побед по годам в категории "{categories}"')
+                       title=f'Количество побед по годам в категории "{filters["categories"]}"')
             st.plotly_chart(fig5, use_container_width=True)
 
     st.markdown('#### Тепловая карта номинаций')
-    top_categories = df_filtered['category'].value_counts().sort_values(ascending=False).head(10).index.tolist()
+    top_categories = df_filtered['category'].value_counts().sort_values(ascending=False).index.tolist()
     compare_categories = st.multiselect(
         label='Выберите категории для сравнения:',
         options=top_categories,
-        default=top_categories[:3]
+        default=top_categories[:5]
     )
     if compare_categories:
         cat_comparison_data = df_filtered[df_filtered['category'].isin(compare_categories)]
